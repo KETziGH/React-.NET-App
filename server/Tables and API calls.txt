@@ -1,0 +1,95 @@
+//database implementation
+
+
+CREATE TABLE Departments (
+    DepartmentId INT PRIMARY KEY IDENTITY (1, 1),
+    DepartmentCode VARCHAR (10) NOT NULL,
+    DepartmentName VARCHAR (100) NOT NULL,
+);
+
+CREATE TABLE Employees (
+    EmployeeId INT PRIMARY KEY IDENTITY (1, 1),
+    FirstName VARCHAR (100) NULL,
+    LastName VARCHAR (100) NULL,
+	EmailAddress VARCHAR (100) NULL,
+    DateOfBirth DATETIME,
+    Age INT NULL,
+    Salary INT NULL,
+	DepartmentId INT NULL,
+    FOREIGN KEY (DepartmentId) REFERENCES Departments (DepartmentId)
+);
+
+//Api calls
+================Department=======================
+[HTTPGET] https://localhost:7092/GetAllDepartments
+[HTTPGET] https://localhost:7092/GetDepartment/2
+[HTTPPOST] https://localhost:7092/CreateDepartment
+    {
+        "departmentCode": "2",
+        "departmentName": "electric"
+    }
+[HTTPPOST] https://localhost:7092/UpdateDepartment
+    {
+	"departmentId": 1
+        "departmentCode": "2",
+        "departmentName": "elec"
+    }
+[HTTPDELETE] https://localhost:7092/DeleteDepartment/2
+
+
+================Employee=======================
+[HTTPGET] https://localhost:7092/GetAllEmployees
+[HTTPGET] https://localhost:7092/GetEmployee/2
+
+[HTTPPOST] https://localhost:7092/CreateEmployee
+{
+    "FirstName" : "sunil",
+    "LastName" : "test",
+    "EmailAddress" : "sunil@abc.com",
+    "BirthDateYear" : 1989,
+    "BirthDateMonth" : 1,
+    "BirthDateDaY" : 30,
+    "Salary" : 68885,
+    "DepartmentId" : 3
+}
+
+
+[HTTPPOST] https://localhost:7092/UpdateEmployee
+{
+    "EmployeeId": 5,
+    "FirstName" : "sunil",
+    "LastName" : "test",
+    "EmailAddress" : "sunil@abc.com",
+    "BirthDateYear" : 2002,
+    "BirthDateMonth" : 1,
+    "BirthDateDaY" : 30,
+    "Salary" : 68885,
+    "DepartmentId" : 2
+}
+
+[HTTPDELETE] https://localhost:7092/DeleteEmployee/5
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
