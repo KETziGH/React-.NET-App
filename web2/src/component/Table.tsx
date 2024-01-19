@@ -79,29 +79,31 @@ const EmployeeData: FC<{ employee?: Employee }> = ({ employee }) => (
 )
 
     const Operation: FC<{ id: Number; type: string }> = ({ id, type }) => {
-    const [loading, setLoading] = useState(false);
+        const [loading, setLoading] = useState(false);
   
     const handleDelete = async () => {
       try {
+        const confirmed = window.confirm (`Do you want to delete ${type}?`);
+        if (confirmed) {
         setLoading(true);
-  
-        // Determine the API endpoint based on the type
+                
         const apiEndpoint = type === 'department' ? `/DeleteDepartment/${id}` : `/DeleteEmployee/${id}`;
-  
-        // Call the delete API endpoint
+        
         const response = await fetch(`https://localhost:7092${apiEndpoint}`, {
           method: 'DELETE',
         });
   
         if (!response.ok) {
           throw new Error('Network response was not ok');
+        }        
+            alert(`${type} deleted successfully`);
+            window.location.reload();
+        }else{
+            console.log(`Deletion of ${type} canceled`);
         }
-  
-        // Handle successful deletion, e.g., refresh the data
-        console.log(`${type} deleted successfully`);
       } catch (error) {
         console.error(`Error deleting ${type}:`, error);
-        // Handle error, show an alert, etc.
+        
       } finally {
         setLoading(false);
       }

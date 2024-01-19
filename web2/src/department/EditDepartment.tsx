@@ -21,6 +21,7 @@ function EditDepartment() {
         const data = await response.json();
         const department = new Department(data.departmentId, data.departmentCode, data.departmentName);
         setDepartmentData(department);
+        
       } catch (error) {
         console.error("Error fetching department:", error);
       }

@@ -136,27 +136,29 @@ const DepartmentForm: FC<{ action: FormAction, departmentData?: Department }> = 
 }
 
 interface ADDEmployee {
-    EmployeeFirstName: string,
-    EmployeeLastName: string,
-    EmployeeEmail: string,
-    EmployeeDOB: Date | undefined,
-    EmployeeSalary: Number | undefined,
-    EmployeeDepartment: string
+
+    DepartmentId: number,
+    departmentCode: string,
+    departmentName: string
     
-    // FirstName : string,
-    // LastName : string,
-    // EmailAddress : string,
-    // BirthDateYear : number,
-    // BirthDateMonth : number,
-    // BirthDateDaY : number,
-    // Salary : number,
-    // DepartmentId : number, 
-    // DepartmentName: string,
+    FirstName : string,
+    LastName : string,
+    EmailAddress : string,
+    BirthDateYear?: string | undefined,
+    BirthDateMonth?: string | undefined,
+    BirthDateDay?: string | undefined,
+    EmployeeDOB: Date | undefined,
+    Salary : Number | undefined,
+    EmployeeDepartment: string,
 
 }
 
 interface UpdateEmployee extends ADDEmployee {
     EmployeeId: Number,
+    BirthDateYear?: string | undefined,
+    BirthDateMonth?: string | undefined,
+    BirthDateDay?: string | undefined,
+
 }
 
 const EmployeeForm: FC<{ action: FormAction, employeeData?: Employee }> = ({action, employeeData}) => {
@@ -175,6 +177,7 @@ const EmployeeForm: FC<{ action: FormAction, employeeData?: Employee }> = ({acti
         try {
             if (action === FormAction.ADD) {
                 data = sendRequest(createEmployee())
+
             } else if (action === FormAction.EDIT && !!employeeData) {
                 data = sendRequest(updateEmployee(employeeData))
             } else {
@@ -222,53 +225,79 @@ const EmployeeForm: FC<{ action: FormAction, employeeData?: Employee }> = ({acti
     }
 
     const createEmployee = (): ADDEmployee => {
+        const selectedDepartment = department.find(dep => dep.name === employeeDepartment);
         const newEmployee = {
-            EmployeeFirstName: employeeFirstName,
-            EmployeeLastName: employeeLastName,
-            EmployeeEmail: employeeEmail,
+            DepartmentId: selectedDepartment?.id || 0, 
+            departmentCode: '',
+            departmentName: '',
+            FirstName : employeeFirstName,
+            LastName : employeeLastName,
+            EmailAddress : employeeEmail,
             EmployeeDOB: employeeDOB,
-            EmployeeSalary: employeeSalary,
+            BirthDateYear: employeeDOB?.getFullYear().toString(),
+            BirthDateMonth: employeeDOB?.getMonth().toString(),
+            BirthDateDay: employeeDOB?.getDate().toString(),
+            Salary : employeeSalary || 0,
             EmployeeDepartment: employeeDepartment
-
-            // FirstName : employeeFirstName,
-            // LastName : employeeLastName,
-            // EmailAddress : employeeEmail,
-            // BirthDateYear=employeeDOB.getFullYear().toString();
-      	    // BirthDateMonth =employeeDOB.getMonth().toString();
-            // BirthDateDay =employeeDOB.getDate().toString();
-            // Salary : employeeSalary,
-            // DepartmentId : departmentId, 
-            // DepartmentName: employeeDepartment,
-
-        }
-
+        };
         return newEmployee;
     }
 
-    const updateEmployee = (employeeData: Employee) => {
- 
+    const updateEmployee = (employeeData: Employee):UpdateEmployee => {
+        const selectedDepartment = department.find(dep => dep.name === employeeDepartment);
         const updateEmployeeData = {
             EmployeeId: employeeData.id,
-            EmployeeFirstName: employeeFirstName,
-            EmployeeLastName: employeeLastName,
-            EmployeeEmail: employeeEmail,
+            DepartmentId: selectedDepartment?.id || 0,
+            departmentCode: '',
+            departmentName: '',
+            FirstName : employeeFirstName,
+            LastName : employeeLastName,
+            EmailAddress : employeeEmail,
             EmployeeDOB: employeeDOB,
-            EmployeeSalary: employeeSalary,
-            EmployeeDepartment: employeeDepartment,
-
-            // FirstName : employeeFirstName,
-            // LastName : employeeLastName,
-            // EmailAddress : employeeEmail,
-            // BirthDateYear=employeeDOB.getFullYear().toString();
-      	    // BirthDateMonth =employeeDOB.getMonth().toString();
-            // BirthDateDay =employeeDOB.getDate().toString();
-            // Salary : employeeSalary,
-            // DepartmentId : departmentId, 
-            // DepartmentName: employeeDepartment,
+            BirthDateYear: employeeDOB?.getFullYear().toString(),
+            BirthDateMonth: employeeDOB?.getMonth().toString(),
+            BirthDateDay: employeeDOB?.getDate().toString(),
+            Salary : employeeSalary || 0,
+            EmployeeDepartment: employeeDepartment
         }
 
         return updateEmployeeData;
     }
+
+    const [department, setDepartment] = useState<Department[]>([]);
+
+    const setInitDepartment = async () => {
+        const initialDepartments = await sendRequest1();
+        let response = await initialDepartments.json();
+        //console.log("response", response)
+        let departmentData = response as ADDEmployee[];
+        const departmentList = !!departmentData && departmentData.map(dep => new Department(dep.DepartmentId, dep.departmentCode, dep.departmentName))
+        //console.log("departmentList", departmentList)
+        setDepartment(departmentList);
+    }
+
+
+    const sendRequest1 = async (): Promise<Response> => {
+
+        const response = await fetch("https://localhost:7092/GetAllDepartments");
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response;
+    }
+
+    const departmentNames = department.map(dep => dep.name);
+    console.log("departmentNames", departmentNames)
+
+    useEffect(() => {
+        try {
+            setInitDepartment()
+        } catch (e: any) {
+            console.error("API NOT FOUND")
+        }
+
+      }, [])
 
     useEffect(() => {
         if (action === FormAction.EDIT && !!employeeData) {
@@ -327,13 +356,16 @@ const EmployeeForm: FC<{ action: FormAction, employeeData?: Employee }> = ({acti
 
                         <Form.Group className="mb-3">
                             <Form.Label>Department</Form.Label>
-                            <Form.Select aria-label="Default select example"
-                                         onChange={e => setEmployeeDepartment(e.target.value)}
-                                         value={employeeDepartment} required>
+                            <Form.Select 
+                                aria-label="Default select example"
+                                onChange={e => setEmployeeDepartment(e.target.value)}
+                                value={employeeDepartment} required>
                                 <option>Department</option>
-                                <option value="1">One</option>
-                                <option value="2">Two</option>
-                                <option value="3">Three</option>
+                                {departmentNames.map((name) => (
+                                     <option key={name} value={name}>
+                                        {name}
+                                     </option>
+                                ))}
                             </Form.Select>
                         </Form.Group>
 

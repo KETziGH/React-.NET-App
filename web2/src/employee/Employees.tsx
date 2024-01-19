@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useState } from 'react'
 import { CustomTable } from '../component/Table'
 import Layout from '../layout/Layout';
-import { Department, Employee } from '../model/Model';
+import { Employee } from '../model/Model';
 
 interface employeeAPIResponse {
     employeeId: Number;

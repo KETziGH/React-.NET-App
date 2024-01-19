@@ -36,7 +36,8 @@ function Departments() {
         return response;
     }
 
-
+    // const departmentNames = department.map(dep => dep.name);
+    // console.log("departmentNames", departmentNames)
 
     useEffect(() => {
         try {
